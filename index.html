@@ -2,7 +2,6 @@
 <head>
 <title> Testing Out WebGL</title>
 <script type="text/javascript" src="gl-matrix.js"></script>
-<script type="text/javascript" src="gl-model.js"> </script>
 <script type="text/javascript" src="webgl.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -11,7 +10,7 @@
     varying vec4 vColor;
 
     void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        gl_FragColor = vColor;
     }
 </script>
 
@@ -19,19 +18,18 @@
     attribute vec3 VertexPosition;
     attribute vec4 VertexColor;
 
-    uniform mat4 uMMatrix;
-    uniform mat4 uPMatrix;
-    uniform mat4 uVMatrix;
+    uniform mat4 mvMatrix;
+    uniform mat4 pMatrix;
 
     varying vec4 vColor;
 
     void main(void) {
-        gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(VertexPosition, 1.0);
+        gl_Position = pMatrix * mvMatrix * vec4(VertexPosition, 1.0);
         vColor = VertexColor;
     }
 </script>
 
 </head>
-<body onload="WebGL()">
+<body onload="main()">
 <canvas id="webglCanvas" width="500" height="500"></canvas>
 </html>
