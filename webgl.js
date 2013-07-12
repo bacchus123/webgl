@@ -12,8 +12,6 @@ function initGL(canvasId){
 	}catch(ex){
 		alert("Unable to create WebGl Context");
 	}
-	gl.clearColor(1.0, 0.5, 0.2, 1.0);
-    gl.enable(gl.DEPTH_TEST);
 
     return gl;
 }
@@ -94,14 +92,19 @@ function getProgram (gl,fragName, vertName, uniformNames, variableNames) {
 
 function main(){
 	var gl = initGL('webglCanvas');
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    
 	var model = {
-		verts : [1.0, 0.0, 0.0,
-				0.0, 1.0, 0.0,
-				0.0, 0.0, 1.0],
-		colors : [0.35, 0.0, 0.44, 1.0,
-					0.44, 0.0, 0.0, 1.0,
-					1.0, 0.0, 1.0, 1.0],
-		indicies : [0,1,2]
+		verts : [0.0,  1.0,  0.0,
+        -1.0, -1.0,  0.0,
+         1.0, -1.0,  0.0,
+         1.0, 1.0, -0.5],
+		colors : [0.7, 1.0, 0.3, 1.0,
+					1.0, 0.3, 0.7, 1.0,
+					0.3, 0.7, 1.0, 1.0,
+					0.3, 0.3, 0.3, 1.0],
+		indicies : [0,1,2,0,2,3]
 	};
 	var vertBuff = initBuffer(gl, model.verts, gl.ARRAY_BUFFER , 3);
 	var colorBuff = initBuffer(gl, model.colors, gl.ARRAY_BUFFER , 4);
@@ -109,11 +112,9 @@ function main(){
 
 	var program = getProgram(gl, 'shader-fs', 'shader-vs', ['pMatrix', 'mvMatrix'], ['VertexPosition', 'VertexColor']);
 	var model = mat4.create();
-	mat4.translate(model, model, [1, .5, -7]);
-	var perspective = mat4.perspective(mat4.create(), 3.14159, .01, 100);
+    mat4.translate(model, model, [0, 0.0, -1.0]);
+    var perspective = mat4.perspective(mat4.create(), 90, gl.viewWidth/gl.viewHeight, 0.01, 1000);
 	draw(gl,model, perspective, program, indexBuffer, vertBuff, colorBuff);
-
-
 }
 
 
@@ -127,15 +128,18 @@ function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer, colorBuf
 
 	gl.uniformMatrix4fv(program['pMatrix'], false,  pMatrix);
 	gl.uniformMatrix4fv(program['mvMatrix'], false, mvMatrix);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	gl.enableVertexAttribArray(program['VertexPosition']);
-	gl.vertexAttribPointer(program['VertexPosition'], vertexBuffer.elmSize, gl.FLOAT,false, 0, 0);
+  
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 	gl.enableVertexAttribArray(program['VertexColor']);
-	gl.vertexAttribPointer(program['VertexColor'], colorBuffer.elmSize, gl.FLOAT,false, 0, 0);
+	gl.vertexAttribPointer(program['VertexColor'], colorBuffer.elmSize, gl.FLOAT, false, 0, 0);
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	gl.enableVertexAttribArray(program['VertexPosition']);
+	gl.vertexAttribPointer(program['VertexPosition'], vertexBuffer.elmSize, gl.FLOAT, false, 0, 0);
+
+
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems,gl.UNSIGNED_SHORT, 0);
 }
