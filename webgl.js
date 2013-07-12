@@ -96,15 +96,24 @@ function main(){
     gl.enable(gl.DEPTH_TEST);
     
 	var model = {
-		verts : [0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0,
-         1.0, 1.0, -0.5],
-		colors : [0.7, 1.0, 0.3, 1.0,
-					1.0, 0.3, 0.7, 1.0,
-					0.3, 0.7, 1.0, 1.0,
-					0.3, 0.3, 0.3, 1.0],
-		indicies : [0,1,2,0,2,3]
+		verts : 
+			[0.5, 0.5, 0.5,
+			 0.5, 0.5, -0.5,
+			-0.5, 0.5, -0.5,
+			 -0.5, 0.5, 0.5,
+			 0.5, -0.5, 0.5,
+			 0.5, -0.5, -0.5,
+			 -0.5, -0.5, -0.5,
+			 -0.5, -0.5, 0.5],
+		colors : [1.0, 0.0, 0.0, 1.0,
+					0.0, 1.0, 0.0, 1.0,
+					0.0, 0.0, 1.0, 1.0,
+					0.0, 0.0, 1.0, 1.0,
+					1.0, 0.0, 0.0, 1.0,
+					0.0, 1.0, 0.0, 1.0,
+					0.0, 0.0, 1.0, 1.0,
+					0.0, 0.0, 1.0, 1.0],
+		indicies : [0,1,2,3,4,5,6,7]
 	};
 	var vertBuff = initBuffer(gl, model.verts, gl.ARRAY_BUFFER , 3);
 	var colorBuff = initBuffer(gl, model.colors, gl.ARRAY_BUFFER , 4);
@@ -114,16 +123,25 @@ function main(){
 	var model = mat4.create();
     mat4.translate(model, model, [0, 0.0, -1.0]);
     var perspective = mat4.perspective(mat4.create(), 90, gl.viewWidth/gl.viewHeight, 0.01, 1000);
-	draw(gl,model, perspective, program, indexBuffer, vertBuff, colorBuff);
+    frame(draw, gl, model, perspective, program, indexBuffer, vertBuff, colorBuff);
 }
 
+function frame (draw, gl, model, perspective, program, indexBuffer, vertBuff, colorBuff) {
+	model = animate(model);
+	draw(gl, model, perspective, program, indexBuffer, vertBuff, colorBuff);
+	requestAnimationFrame(function(){frame (draw, gl, model, perspective, program, indexBuffer, vertBuff, colorBuff);});
+}
+var i = 0;
+function animate(model){
+	i++;
+	return mat4.rotateX(model, model, (2*3.14159) * ((i%60000)/60000));
+}
 
 	
 
 function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer, colorBuffer){
 	gl.viewport(0, 0, gl.viewWidth, gl.viewHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
 	gl.useProgram(program);
 
 	gl.uniformMatrix4fv(program['pMatrix'], false,  pMatrix);
@@ -141,5 +159,5 @@ function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer, colorBuf
 
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems,gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLE_STRIP, indexBuffer.numItems,gl.UNSIGNED_SHORT, 0);
 }
