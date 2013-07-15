@@ -15,7 +15,7 @@ function initGL(canvasId){
 
     return gl;
 }
-function initBuffer(gl, data, bufferType, vertSize, colorSize){
+function initBuffer(gl, data, bufferType, vertSize, texCoordSize){
 	var	buff = gl.createBuffer();
 	gl.bindBuffer(bufferType, buff);
 	
@@ -26,14 +26,14 @@ function initBuffer(gl, data, bufferType, vertSize, colorSize){
 	}else{
 		return null;
 	}
-	var elementSize = colorSize + vertSize;
+	var elementSize = texCoordSize + vertSize;
 
 	if(data.length % elementSize != 0){
 		alert("Invalid number of elements in buffer");
 		return null;
 	}
 	buff.vertSize = vertSize;
-	buff.colorSize = colorSize;
+	buff.texCoordSize = texCoordSize;
 	buff.elmSize = elementSize;
 	buff.numItems = data.length/buff.elmSize;
 	
@@ -66,6 +66,26 @@ function getShader (gl,shaderName) {
 	gl.compileShader(shader);
 	return shader;
 }
+
+function initTexture(gl, textName){
+	texture = gl.createTexture();
+	texture.image = new Image();
+	texture.image.onload = function(){
+		bindLoadedTexture(gl, texture);
+	}
+	texture.image.src = textName;
+	return texture;
+}
+function bindLoadedTexture(gl, texture){
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+
+}
+
 function getProgram (gl,fragName, vertName, uniformNames, variableNames) {
 	var vertShader = getShader(gl, vertName);
 	var fragShader = getShader(gl, fragName);
@@ -102,40 +122,40 @@ function main(){
 		verts : 
 			 // Front face
       [
-      -1.0, -1.0,  1.0, 1.0, 0.0, 0.0, 1.0,
-       1.0, -1.0,  1.0, 1.0, 0.0, 0.0, 1.0,
-       1.0,  1.0,  1.0, 1.0, 0.0, 0.0, 1.0,
-      -1.0,  1.0,  1.0, 1.0, 0.0, 0.0, 1.0,
+      -1.0, -1.0,  1.0, 0.0, 0.0,
+       1.0, -1.0,  1.0, 1.0, 0.0,
+       1.0,  1.0,  1.0, 1.0, 1.0,
+      -1.0,  1.0,  1.0, 0.0, 1.0,
 
       // Back face
-      -1.0, -1.0, -1.0, 1.0, 1.0, 0.0, 1.0,
-      -1.0,  1.0, -1.0, 1.0, 1.0, 0.0, 1.0,
-       1.0,  1.0, -1.0, 1.0, 1.0, 0.0, 1.0,
-       1.0, -1.0, -1.0, 1.0, 1.0, 0.0, 1.0,
+      -1.0, -1.0, -1.0, 1.0, 0.0,
+      -1.0,  1.0, -1.0, 1.0, 1.0,
+       1.0,  1.0, -1.0, 0.0, 1.0,
+       1.0, -1.0, -1.0, 0.0, 0.0,
 
       // Top face
-      -1.0,  1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
-      -1.0,  1.0,  1.0, 0.0, 1.0, 0.0, 1.0,
-       1.0,  1.0,  1.0, 0.0, 1.0, 0.0, 1.0,
-       1.0,  1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
+      -1.0,  1.0, -1.0, 0.0, 1.0,
+      -1.0,  1.0,  1.0, 0.0, 0.0,
+       1.0,  1.0,  1.0, 1.0, 0.0,
+       1.0,  1.0, -1.0, 1.0, 1.0,
 
       // Bottom face
-      -1.0, -1.0, -1.0, 1.0, 0.5, 0.5, 1.0,
-       1.0, -1.0, -1.0, 1.0, 0.5, 0.5, 1.0,
-       1.0, -1.0,  1.0, 1.0, 0.5, 0.5, 1.0,
-      -1.0, -1.0,  1.0, 1.0, 0.5, 0.5, 1.0,
+      -1.0, -1.0, -1.0, 1.0, 1.0,
+       1.0, -1.0, -1.0, 0.0, 1.0,
+       1.0, -1.0,  1.0, 0.0, 0.0,
+      -1.0, -1.0,  1.0, 1.0, 0.0,
 
       // Right face
-       1.0, -1.0, -1.0, 1.0, 0.0, 1.0, 1.0,
-       1.0,  1.0, -1.0, 1.0, 0.0, 1.0, 1.0,
-       1.0,  1.0,  1.0, 1.0, 0.0, 1.0, 1.0,
-       1.0, -1.0,  1.0, 1.0, 0.0, 1.0, 1.0,
+       1.0, -1.0, -1.0, 1.0, 0.0,
+       1.0,  1.0, -1.0, 1.0, 1.0,
+       1.0,  1.0,  1.0, 0.0, 1.0,
+       1.0, -1.0,  1.0, 0.0, 0.0, 
 
       // Left face
-      -1.0, -1.0, -1.0, 0.0, 0.0, 1.0, 1.0,
-      -1.0, -1.0,  1.0, 0.0, 0.0, 1.0, 1.0,
-      -1.0,  1.0,  1.0, 0.0, 0.0, 1.0, 1.0,
-      -1.0,  1.0, -1.0, 0.0, 0.0, 1.0, 1.0],
+      -1.0, -1.0, -1.0, 0.0,0.0,
+      -1.0, -1.0,  1.0, 1.0, 1.0,
+      -1.0,  1.0,  1.0, 1.0, 1.0,
+      -1.0,  1.0, -1.0, 0.0, 1.0],
 		
 
 		indicies : [
@@ -146,36 +166,42 @@ function main(){
       16, 17, 18,   16, 18, 19, // Right face
       20, 21, 22,   20, 22, 23]  // Left face]
 	};
-	var vertBuff = initBuffer(gl, model.verts, gl.ARRAY_BUFFER , 3, 4);
+	var vertBuff = initBuffer(gl, model.verts, gl.ARRAY_BUFFER , 4, 2);
 	var indexBuffer = initBuffer(gl, model.indicies, gl.ELEMENT_ARRAY_BUFFER , 1, 0);
-
-	var program = getProgram(gl, 'shader-fs', 'shader-vs', ['pMatrix', 'mvMatrix'], ['VertexPosition', 'VertexColor']);
+	var text2d = initTexture(gl, "bline.gif");
+	var program = getProgram(gl, 'shader-fs', 'shader-vs', ['pMatrix', 'mvMatrix','sampler'], ['VertexPosition', 'TextCoord']);
 	var model = mat4.create();
     mat4.translate(model, model, [0, 0.0, -3.0]);
     var perspective = mat4.perspective(mat4.create(), 90, gl.viewWidth/gl.viewHeight, 0.01, 1000);
-    frame(draw, gl, model, perspective, program, indexBuffer, vertBuff);
+	frame(draw, gl, model, perspective, program, indexBuffer, vertBuff, text2d);
+    
+
 }
 
-function frame (draw, gl, model, perspective, program, indexBuffer, vertBuff) {
+function frame (draw, gl, model, perspective, program, indexBuffer, vertBuff, text2d) {
 	model = animate(model);
-	draw(gl, model, perspective, program, indexBuffer, vertBuff);
-	requestAnimationFrame(function(){frame (draw, gl, model, perspective, program, indexBuffer, vertBuff);});
+	draw(gl, model, perspective, program, indexBuffer, vertBuff, text2d);
+	requestAnimationFrame(function(){frame (draw, gl, model, perspective, program, indexBuffer, vertBuff, text2d);});
 }
+
 var lastTime = new Date().getTime(); 
 function animate(model){
 	var time  = new Date().getTime();
 	var delta = time - lastTime;
 	lastTime = time;
 	return mat4.rotate(model, model, (3.14159)*(delta/1000), [0.33, 1.0, -0.48]);
-
 }
 
 	
 
-function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer){
+function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer, text2d){
 	gl.viewport(0, 0, gl.viewWidth, gl.viewHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.useProgram(program);
+
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, text2d);
+	gl.uniform1i(program['sampler'], 0);
 
 	gl.uniformMatrix4fv(program['pMatrix'], false,  pMatrix);
 	gl.uniformMatrix4fv(program['mvMatrix'], false, mvMatrix);
@@ -183,10 +209,10 @@ function draw(gl, mvMatrix,pMatrix, program, indexBuffer, vertexBuffer){
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 	gl.enableVertexAttribArray(program['VertexPosition']);
 	gl.vertexAttribPointer(program['VertexPosition'], vertexBuffer.vertSize, gl.FLOAT, false, vertexBuffer.elmSize * GL_FLOAT_SIZE, 0);
-	
-	gl.enableVertexAttribArray(program['VertexColor']);
-	gl.vertexAttribPointer(program['VertexColor'], vertexBuffer.colorSize, gl.FLOAT, false, vertexBuffer.elmSize * GL_FLOAT_SIZE, vertexBuffer.vertSize * GL_FLOAT_SIZE);
 
+	gl.enableVertexAttribArray(program['TextCoord']);
+	gl.vertexAttribPointer(program['TextCoord'], vertexBuffer.texCoordSize, gl.FLOAT, false, vertexBuffer.elmSize * GL_FLOAT_SIZE, vertexBuffer.vertSize * GL_FLOAT_SIZE); 
+	
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems,gl.UNSIGNED_SHORT, 0);

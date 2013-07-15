@@ -10,25 +10,27 @@
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
 
-    varying vec4 vColor;
+    varying vec2 vTextCoord;
+
+    uniform sampler2D sampler;
 
     void main(void) {
-        gl_FragColor = vColor;
+        gl_FragColor = texture2D(sampler, vec2(vTextCoord.s, vTextCoord.t));
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec3 VertexPosition;
-    attribute vec4 VertexColor;
+    attribute vec2 TextCoord;
 
     uniform mat4 mvMatrix;
     uniform mat4 pMatrix;
 
-    varying vec4 vColor;
+    varying vec2 vTextCoord;
 
     void main(void) {
         gl_Position = pMatrix * mvMatrix * vec4(VertexPosition, 1.0);
-        vColor = VertexColor;
+        vTextCoord = TextCoord;
     }
 </script>
 
